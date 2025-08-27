@@ -25,7 +25,7 @@ public sealed class Notification(ChannelType channel, string recipient, string m
         NextAttemptAt = null;
     }
 
-    public void MarkDeferred(string error, DateTimeOffset nextAttemptAt)
+    public void MarkDelayed(string error, DateTimeOffset nextAttemptAt)
     {
         Status = NotificationStatus.Delayed;
         Attempts += 1;
@@ -33,7 +33,7 @@ public sealed class Notification(ChannelType channel, string recipient, string m
         NextAttemptAt = nextAttemptAt;
     }
 
-    public void MarkFailedFinal(string error)
+    public void MarkFailed(string error)
     {
         Status = NotificationStatus.Failed;
         Attempts += 1;

@@ -37,7 +37,7 @@ public sealed class SendNotificationHandler(
         }
 
         var next = _clock.UtcNow.AddMinutes(1);
-        notification.MarkDeferred("All providers failed", next);
+        notification.MarkDelayed("All providers failed", next);
         await _repo.UpdateAsync(notification);
         await _queue.EnqueueAsync(notification.Id, next);
 

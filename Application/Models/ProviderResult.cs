@@ -1,3 +1,3 @@
 ﻿namespace Application.Models;
 
-public abstract record ProviderResult(bool Success, string? Error = null, bool IsTransient = true);
+public sealed record ProviderResult(bool Success, string? Error = null, bool IsTransient = true);
