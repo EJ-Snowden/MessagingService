@@ -7,7 +7,8 @@ builder.Services
     .AddJsonEnumSupport();
 
 builder.Services
-    .AddSwaggerGen();
+    .AddSwaggerDocs()
+    .AddAppServices();
 
 var app = builder.Build();
 
