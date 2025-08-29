@@ -7,8 +7,8 @@ namespace Infrastructure.Providers;
 
 public sealed class AwsSnsSmsProvider : INotificationProvider
 {
-    public bool Enabled { get; init; } = true;
-    public int Priority { get; init; } = 2;
+    public bool Enabled { get; set; } = true;
+    public int Priority { get; set; } = 2;
 
     public bool CanHandle(ChannelType channel) => channel == ChannelType.Sms;
 

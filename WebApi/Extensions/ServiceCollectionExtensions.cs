@@ -35,18 +35,21 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddAppServices(this IServiceCollection services)
+    public static IServiceCollection AddAppServices(this IServiceCollection services, IConfiguration config)
     {
+        services.Configure<MessagingOptions>(config.GetSection("Messaging"));
+
         services.AddSingleton<INotificationRepository, InMemoryNotificationRepository>();
         services.AddSingleton<IRetryQueue, InMemoryRetryQueue>();
         services.AddSingleton<IClock, SystemClock>();
 
         services.AddSingleton<INotificationProvider>(new TwilioSmsProvider { Enabled = true, Priority = 1 });
         services.AddSingleton<INotificationProvider>(new AwsSnsSmsProvider { Enabled = true, Priority = 2 });
-        services.AddSingleton<INotificationProvider>(new EmailProvider     { Enabled = true, Priority = 1 });
+        services.AddSingleton<INotificationProvider>(new EmailProvider { Enabled = true, Priority = 1 });
+
+        services.AddSingleton<IProviderRegistry, ProviderRegistry>();
 
         services.AddSingleton<SendNotificationHandler>();
-
         services.AddHostedService<RetryBackgroundService>();
 
         return services;
