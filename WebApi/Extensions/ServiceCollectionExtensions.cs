@@ -1,10 +1,10 @@
 ﻿using System.Text.Json.Serialization;
 using Application.Interfaces;
 using Application.UseCases.Handlers;
-using Infrastructure;
 using Infrastructure.Jobs;
 using Infrastructure.Providers;
 using Infrastructure.Repositories;
+using Infrastructure.Services;
 using Microsoft.OpenApi.Models;
 
 namespace MessagingService.Extensions;

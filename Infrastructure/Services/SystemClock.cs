@@ -1,6 +1,6 @@
 ﻿using Application.Interfaces;
 
-namespace  Infrastructure;
+namespace Infrastructure.Services;
 
 public sealed class SystemClock : IClock
 {

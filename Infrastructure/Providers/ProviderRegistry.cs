@@ -7,8 +7,7 @@ namespace Infrastructure.Providers;
 
 public sealed class ProviderRegistry : IProviderRegistry
 {
-    private readonly ConcurrentDictionary<string, INotificationProvider> _providers 
-        = new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentDictionary<string, INotificationProvider> _providers = new(StringComparer.OrdinalIgnoreCase);
 
     public ProviderRegistry(IEnumerable<INotificationProvider> providers)
     {
@@ -53,14 +52,14 @@ public sealed class ProviderRegistry : IProviderRegistry
 
             foreach (var config in configList)
             {
-                if (!_providers.TryGetValue(config.Name, out var provider))
+                if (!_providers.TryGetValue(ProviderOption.Name, out var provider))
                     continue;
 
                 if (!provider.CanHandle(channel))
                     continue;
 
-                provider.Enabled  = config.Enabled;
-                provider.Priority = config.Priority;
+                provider.Enabled = ProviderOption.Enabled;
+                provider.Priority = ProviderOption.Priority;
             }
         }
     }
@@ -69,7 +68,7 @@ public sealed class ProviderRegistry : IProviderRegistry
     private static string GetName(INotificationProvider provider)
     {
         var typeName = provider.GetType().Name;
-        return typeName.EndsWith("Provider", StringComparison.Ordinal) ? typeName[..^"Provider".Length] : typeName;
+        return typeName.Replace("Provider", string.Empty, StringComparison.Ordinal);
     }
 
     private static ChannelType DetectChannel(INotificationProvider provider)

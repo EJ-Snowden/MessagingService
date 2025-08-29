@@ -2,7 +2,7 @@
 
 public interface IRetryQueue
 {
-    Task EnqueueAsync(Guid notificationId, DateTimeOffset nextAttemptAt);
-    Task<IReadOnlyList<(Guid Id, DateTimeOffset Due)>> DequeueDueAsync(DateTimeOffset now, int max);
+    Task EnqueueAsync(Guid notificationId, DateTime nextAttemptAt);
+    Task<IReadOnlyList<(Guid Id, DateTime Due)>> DequeueDueAsync(DateTime now, int max);
     Task<int> CountAsync();
 }

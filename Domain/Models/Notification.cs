@@ -13,8 +13,8 @@ public sealed class Notification(ChannelType channel, string recipient, string m
     public string? Subject { get; private set; } = subject;
     public NotificationStatus Status { get; private set; } = NotificationStatus.Pending;
     public int Attempts { get; private set; }
-    public DateTimeOffset CreatedAt { get; private set; } = DateTimeOffset.UtcNow;
-    public DateTimeOffset? NextAttemptAt { get; private set; }
+    public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
+    public DateTime? NextAttemptAt { get; private set; }
     public string? LastError { get; private set; }
 
     public void MarkSent()
@@ -25,7 +25,7 @@ public sealed class Notification(ChannelType channel, string recipient, string m
         NextAttemptAt = null;
     }
 
-    public void MarkDelayed(string error, DateTimeOffset nextAttemptAt)
+    public void MarkDelayed(string error, DateTime nextAttemptAt)
     {
         Status = NotificationStatus.Delayed;
         Attempts += 1;

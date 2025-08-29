@@ -4,13 +4,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Jobs;
 
-public sealed class RetryBackgroundService(
-    IRetryQueue queue,
-    INotificationRepository repo,
-    IEnumerable<INotificationProvider> providers,
-    IClock clock,
-    ILogger<RetryBackgroundService> log) : BackgroundService
+public sealed class RetryBackgroundService(IRetryQueue queue, INotificationRepository repo, IEnumerable<INotificationProvider> providers, IClock clock, ILogger<RetryBackgroundService> logger) : BackgroundService
 {
+    private const int MaxAttempts = 15;
+
     protected override async Task ExecuteAsync(CancellationToken stopToken)
     {
         while (!stopToken.IsCancellationRequested)
@@ -24,20 +21,16 @@ public sealed class RetryBackgroundService(
                     try
                     {
                         var notification = await repo.GetByIdAsync(notificationId);
-                        if (notification is null)
-                        {
-                            continue;
-                        }
+                        if (notification is null) continue;
 
                         var candidates = providers
                             .Where(p => p.Enabled && p.CanHandle(notification.Channel))
                             .OrderBy(p => p.Priority)
                             .ToArray();
 
-                        if (candidates.Length == 0)
-                        {
-                            continue;
-                        }
+                        if (candidates.Length == 0) continue;
+
+                        var sent = false;
 
                         foreach (var provider in candidates)
                         {
@@ -46,22 +39,36 @@ public sealed class RetryBackgroundService(
 
                             notification.MarkSent();
                             await repo.UpdateAsync(notification);
-
+                            sent = true;
                             break;
                         }
+
+                        if (sent) continue;
+
+                        if (notification.Attempts >= MaxAttempts - 1)
+                        {
+                            notification.MarkFailed("max attempts reached");
+                            await repo.UpdateAsync(notification);
+                            continue;
+                        }
+
+                        var next = clock.UtcNow.AddMinutes(5);
+                        notification.MarkDelayed("retry failed", next);
+                        await repo.UpdateAsync(notification);
+                        await queue.EnqueueAsync(notification.Id, next);
                     }
                     catch (Exception ex)
                     {
-                        log.LogError(ex, "Error while retrying notification {Id}", notificationId);
+                        logger.LogError(ex, "Retry failed for {Id}", notificationId);
                     }
                 }
             }
             catch (Exception ex)
             {
-                log.LogError(ex, "Retry loop failed");
+                logger.LogError(ex, "Retry loop crashed");
             }
 
-            await Task.Delay(TimeSpan.FromSeconds(60), stopToken);
+            await Task.Delay(TimeSpan.FromSeconds(300), stopToken);
         }
     }
 }

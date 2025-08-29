@@ -4,32 +4,31 @@ namespace Infrastructure.Repositories;
 
 public sealed class InMemoryRetryQueue : IRetryQueue
 {
-    private readonly List<(Guid Id, DateTimeOffset Due)> _items = [];
+    private readonly List<(Guid Id, DateTime Due)> _items = [];
+    private readonly Lock _gate = new();
 
-    public Task EnqueueAsync(Guid notificationId, DateTimeOffset nextAttemptAt)
+    public Task EnqueueAsync(Guid notificationId, DateTime nextAttemptAt)
     {
-        _items.Add((notificationId, nextAttemptAt));
-
+        lock (_gate)
+        {
+            _items.Add((notificationId, nextAttemptAt));
+        }
         return Task.CompletedTask;
     }
 
-    public Task<IReadOnlyList<(Guid Id, DateTimeOffset Due)>> DequeueDueAsync(DateTimeOffset now, int max)
+    public Task<IReadOnlyList<(Guid Id, DateTime Due)>> DequeueDueAsync(DateTime now, int max)
     {
-        var dueItems = _items
-            .Where(item => item.Due <= now)
-            .Take(max)
-            .ToList();
-
-        foreach (var item in dueItems)
+        List<(Guid Id, DateTime Due)> due;
+        lock (_gate)
         {
-            _items.Remove(item);
+            due = _items.Where(x => x.Due <= now).Take(max).ToList();
+            foreach (var item in due) _items.Remove(item);
         }
-
-        return Task.FromResult<IReadOnlyList<(Guid, DateTimeOffset)>>(dueItems);
+        return Task.FromResult<IReadOnlyList<(Guid, DateTime)>>(due);
     }
 
     public Task<int> CountAsync()
     {
-        return Task.FromResult(_items.Count);
+        lock (_gate) return Task.FromResult(_items.Count);
     }
 }

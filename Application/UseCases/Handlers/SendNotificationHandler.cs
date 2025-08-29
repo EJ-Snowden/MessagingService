@@ -4,11 +4,7 @@ using Domain.Entities;
 
 namespace Application.UseCases.Handlers;
 
-public sealed class SendNotificationHandler(
-    IEnumerable<INotificationProvider> providers,
-    INotificationRepository repo,
-    IRetryQueue queue,
-    IClock clock)
+public sealed class SendNotificationHandler(IEnumerable<INotificationProvider> providers, INotificationRepository repo, IRetryQueue queue, IClock clock)
 {
     private readonly IEnumerable<INotificationProvider> _providers = providers ?? throw new ArgumentNullException(nameof(providers));
     private readonly INotificationRepository _repo = repo ?? throw new ArgumentNullException(nameof(repo));

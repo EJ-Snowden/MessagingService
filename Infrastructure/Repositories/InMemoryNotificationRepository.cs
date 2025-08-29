@@ -1,11 +1,12 @@
-﻿using Application.Interfaces;
+﻿using System.Collections.Concurrent;
+using Application.Interfaces;
 using Domain.Entities;
 
 namespace Infrastructure.Repositories;
 
 public sealed class InMemoryNotificationRepository : INotificationRepository
 {
-    private readonly Dictionary<Guid, Notification> _store = new();
+    private readonly ConcurrentDictionary<Guid, Notification> _store = new();
 
     public Task AddAsync(Notification notification)
     {
