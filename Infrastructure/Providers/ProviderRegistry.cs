@@ -52,14 +52,14 @@ public sealed class ProviderRegistry : IProviderRegistry
 
             foreach (var config in configList)
             {
-                if (!_providers.TryGetValue(ProviderOption.Name, out var provider))
+                if (!_providers.TryGetValue(config.Name, out var provider))
                     continue;
 
                 if (!provider.CanHandle(channel))
                     continue;
 
-                provider.Enabled = ProviderOption.Enabled;
-                provider.Priority = ProviderOption.Priority;
+                provider.Enabled = config.Enabled;
+                provider.Priority = config.Priority;
             }
         }
     }

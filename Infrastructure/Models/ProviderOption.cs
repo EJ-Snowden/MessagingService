@@ -2,7 +2,7 @@
 
 public sealed class ProviderOption
 {
-    public static string Name => string.Empty;
-    public static bool Enabled => true;
-    public static int Priority => 1;
+    public string Name { get; init; }  = string.Empty;
+    public bool Enabled { get; init; } = true;
+    public int Priority { get; init; } = 1;
 }
