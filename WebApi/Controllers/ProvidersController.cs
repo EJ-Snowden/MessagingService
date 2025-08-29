@@ -8,7 +8,7 @@ namespace MessagingService.Controllers;
 [Route("providers")]
 public sealed class ProvidersController(IProviderRegistry registry) : ControllerBase
 {
-    [HttpGet]
+    [HttpGet("list")]
     public IActionResult List() => Ok(registry.GetAll());
 
     [HttpPatch("{name}")]

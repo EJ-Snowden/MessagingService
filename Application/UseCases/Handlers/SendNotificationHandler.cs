@@ -22,18 +22,23 @@ public sealed class SendNotificationHandler(IEnumerable<INotificationProvider> p
             .Where(p => p.Enabled && p.CanHandle(notification.Channel))
             .OrderBy(p => p.Priority)
             .ToArray();
-
+        
+        string? lastError = null;
+        
         foreach (var provider in candidates)
         {
             ProviderResult result = await provider.SendAsync(notification);
-            if (!result.Success) continue;
-            notification.MarkSent();
-            await _repo.UpdateAsync(notification);
-            return notification.Id;
+            if (result.Success)
+            {
+                notification.MarkSent();
+                await _repo.UpdateAsync(notification);
+                return notification.Id;
+            }
+            lastError = result.Error;
         }
 
         var next = _clock.UtcNow.AddMinutes(1);
-        notification.MarkDelayed("All providers failed", next);
+        notification.MarkDelayed(lastError ?? "all providers failed", next);
         await _repo.UpdateAsync(notification);
         await _queue.EnqueueAsync(notification.Id, next);
 

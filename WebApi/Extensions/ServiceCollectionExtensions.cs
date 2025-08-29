@@ -38,14 +38,15 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddAppServices(this IServiceCollection services, IConfiguration config)
     {
         services.Configure<MessagingOptions>(config.GetSection("Messaging"));
+        services.Configure<SmtpOptions>(config.GetSection("Smtp"));
 
         services.AddSingleton<INotificationRepository, InMemoryNotificationRepository>();
         services.AddSingleton<IRetryQueue, InMemoryRetryQueue>();
         services.AddSingleton<IClock, SystemClock>();
 
+        services.AddSingleton<INotificationProvider, EmailProvider>();
         services.AddSingleton<INotificationProvider>(new TwilioSmsProvider { Enabled = true, Priority = 1 });
         services.AddSingleton<INotificationProvider>(new AwsSnsSmsProvider { Enabled = true, Priority = 2 });
-        services.AddSingleton<INotificationProvider>(new EmailProvider { Enabled = true, Priority = 1 });
 
         services.AddSingleton<IProviderRegistry, ProviderRegistry>();
 
